@@ -1,6 +1,4 @@
-@extends('layouts.main_layout')
-@section('content')
-
-<p class="display-6 text-secondary text-center py-5">CONTENT</p>
-
-@endsection
+<x-layouts.main-layout pageTitle="Teste">
+    {{-- {{$user->username}} --}}
+<p class="text-center my-5 display-6">Bem vindo, </p>
+</x-layouts.main-layout>

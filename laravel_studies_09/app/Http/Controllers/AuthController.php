@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+
 
 class AuthController extends Controller
 {
@@ -77,6 +79,58 @@ class AuthController extends Controller
     public function logout(){
         Auth::logout();
         return redirect()->route('login');
+    }
+
+    public function register(){
+        return view('auth.register');
+    }
+
+    public function  store_user(Request $request){
+        // dd($request);
+
+        // Form Validation
+        $request->validate(
+            [
+                'username' => 'required|min:4|max:30|unique:users,username',
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:6|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
+                'password_confirmation' => 'required|same:password'
+                
+            ],
+            [
+
+                'username.required' => 'O usuário é obrigatório',
+                'username.min' => 'O usuário deve ter no mínimo :min caracteres',
+                'username.max' => 'O usuário deve ter no máximo :max caracteres',
+
+                'email.required' => 'O email é obrigatório',
+                'email.email' => 'O email não é válido',
+
+                'password.required' => 'A senha é obrigatória',
+                'password.min' => 'A senha deve conter no mínimo :min caracteres',
+                'password.max' => 'A senha deve conter no máximo :max caracteres',
+                'password.regex' => 'A senha deve conter pelo menos uma letra maiúscula, uma letra minúscula e um número',
+                
+                'password_confirmation.required' => 'A confirmação da senha é obrigatória',
+                'password_confirmation.same' => 'A confirmação da senha não é igual à senha',
+                
+            ]
+        );
+
+        // Criando um novo usuário definindo um token de verificação de email
+        $user = new User();
+
+        $user->username = $request->username;
+        $user->email = $request->email;
+        $user->password = bcrypt($request->password);
+        
+        // Criando token
+        $user->token = Str::random(64);
+        // Verificando dados do user
+        dd($user);
+        
+        
+        
     }
 
     public function home(){

@@ -21,6 +21,8 @@ Route::middleware('guest')->group(function(){
     // Login Routes
     Route::get('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/submit_post', [AuthController::class, 'authenticate'])->name('authenticate');
+
+    Route::get('/new_user_confirm/{token}', [AuthController::class, 'new_user_confirmation'])->name('new_user_confirmation');
     
 });
 

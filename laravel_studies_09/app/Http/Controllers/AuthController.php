@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewUserConfirmation;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 
@@ -126,14 +128,43 @@ class AuthController extends Controller
         
         // Criando token
         $user->token = Str::random(64);
-        // Verificando dados do user
-        dd($user);
         
+        // Verificando dados do user
+        // dd($user);
+
+        // Gerar link
+        $link_confirm = route('new_user_confirmation', ['token' => $user->token]);
+        
+        // Enviar Email
+        $result = Mail::to($user->email)->send(new NewUserConfirmation($user->username, $link_confirm));
+
+        // Verificar se o envio foi com sucesso
+        if(!$result){
+            return back()->withInput()->with(
+                [
+                    'server_error' => 'Ocorreu um erro ao enviar o email de confirmação!'
+                    
+                ]
+                );
+        }
+
+        // Salvar User
+        $user->save();
+
+        // Apresentar view de sucesso
+
+        return view('auth.email_sent', ['email' => $user->email]);
+
         
         
     }
 
     public function home(){
         return view('home');
+    }
+
+
+    public function new_user_confirmation($token){
+        echo 'New User Confirmation Page';
     }
 }

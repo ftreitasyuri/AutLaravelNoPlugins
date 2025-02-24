@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Mail\NewUserConfirmation;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+
 use Illuminate\Support\Str;
 
 
@@ -42,7 +44,7 @@ class AuthController extends Controller
             where('active', true)-> 
             where(function($query){
                 $query->whereNull('blocked_until')
-                ->orWhere('blocked_until', '<=', now());
+                ->orWhere('blocked_until', '<=', Carbon::now());
             })->whereNotNull('email_verified_at')->
             whereNull('deleted_at')->first();
 
@@ -53,7 +55,7 @@ class AuthController extends Controller
                 'invalid_login' => 'Login Inválido'
             ]);
         }
-        
+         
         // Verificar se a senha é valida
 
         if(!password_verify($credentials['password'], $user->password)){
@@ -65,9 +67,9 @@ class AuthController extends Controller
 
         // Atualizar o last_login
 
-        $user->last_login_at = now();
+        $user->last_login_at = Carbon::now();
         $user->blocked_until = null;
-        $user->save;
+        $user->save();
 
         // Logar
         $request->session()->regenerate();
@@ -165,6 +167,27 @@ class AuthController extends Controller
 
 
     public function new_user_confirmation($token){
-        echo 'New User Confirmation Page';
+        
+        // Verificar se o token é válido
+        $user = User::where('token', $token)->first();
+        if(!$user){
+            return redirect()->route('login');
+        }
+
+        // Confirmar o registro do usuário
+        $user->email_verified_at = Carbon::now();
+        $user->token = null;
+        $user->active = true;
+        $user->last_login_at = Carbon::now();
+        $user->save();
+
+        // Autenticação automática do usuário confirmado
+        Auth::login($user);
+
+        
+
+        // Apresenta uma mensagem de sucesso
+
+        return view('auth.new_user_confirmation');
     }
 }

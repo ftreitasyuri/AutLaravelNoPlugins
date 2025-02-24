@@ -13,6 +13,10 @@
 
 <body>
 
+    @Auth
+    <x-user-bar/>
+    @endauth
+    
     <!-- content -->
     {{ $slot }}
 

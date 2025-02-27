@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MainController;
+use Faker\Guesser\Name;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 
@@ -46,4 +47,7 @@ Route::middleware('auth')->group(function(){
 
     
     Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
+
+    // Delete account
+    Route::post('/delete_account', [AuthController::class, 'delete_account'])->name('delete_account');
 });

@@ -52,7 +52,12 @@
 
                         @if (session('success'))
                             <div class="alert alert-success text-center mt-4">
-                                Senha sedefinida com sucesso
+                                Senha redefinida com sucesso
+                            </div>
+                        @endif
+                        @if (session('success_delete'))
+                            <div class="alert alert-success text-center mt-4">
+                                {{session('success_delete')}}
                             </div>
                         @endif
 

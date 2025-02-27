@@ -43,16 +43,36 @@
 
                 @if (session('server_error'))
                     <div class="alert alert-danger text-center mt-3">
-                        {{session('server_error')}}
-                    </div>
-                @endif
-           
-                @if (session('success'))
-                    <div class="alert alert-success text-center mt-3">
-                        {{session('success')}}
+                        {{ session('server_error') }}
                     </div>
                 @endif
 
+                @if (session('success'))
+                    <div class="alert alert-success text-center mt-3">
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                <hr>
+                <div class="card border-1 border-danger p-5 text-center">
+                    Se pretender remover sua conta de forma permanente escreva o texto "ELIMINAR"
+                    e clique no botão abaixo:
+
+                    <form action="{{route('delete_account')}}" method="post">
+                        @csrf
+                        <div class="mb-3">
+                            <input type="text" class="form-control text-center" name="delete_confirmation" maxlength="8">
+                            @error('delete_confirmation')
+                            <div class="text-danger text-center mt-3">
+                                {{$message}}
+                            </div>
+                            @enderror
+                        </div>
+                        <button type="submit" class="btn btn-danger">ELIMINAR</button>
+
+
+                    </form>
+                </div>
             </div>
         </div>
     </div>

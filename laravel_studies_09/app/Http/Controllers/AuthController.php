@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\NewUserConfirmation;
+use App\Mail\ResetPassword;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 use Illuminate\Support\Str;
-
+use LDAP\Result;
 
 class AuthController extends Controller
 {
@@ -291,12 +292,84 @@ class AuthController extends Controller
 
         // dd('Aqui');
 
-        
 
+        // Gerando token
+        $user->token = Str::random(64);
+        $token_link = route('reset_password', ['token' => $user->token]);
+
+        // Envio do email com o link para recuperar
+        $result = Mail::to($user->email)->send(new ResetPassword($user->username, $token_link));
+    
+        // Verifica se o email foi envia
+        if(!$result){
+            return back()->with([
+                'server_message' => $generic_message
+            ]);
+        }
+
+        // Guardar o token na base
+        $user->save();
 
         return back()->with([
             'server_message' => $generic_message
         ]);
         // etc...
     }
+
+    public function reset_password($token){
+        // Verificar se o token é válido
+        $user = User::where('token', $token)->first();
+        if(!$user){
+            return redirect('login');
+        }
+
+        return view('auth.reset_password', ['token' => $token]);
+
+
+    }
+
+    public function reset_password_update(Request $request){
+        // Validando senha
+        $request->validate(
+            [
+                'new_password' => 'required|min:6|max:32|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
+                'new_password_confirmation' => 'required|same:new_password'
+            ],
+            [
+                'new_password.required' => 'A senha é obrigatória',
+                'new_password.min' => 'A senha deve conter no mínimo :min caracteres',
+                'new_password.max' => 'A senha deve conter no máximo :max caracteres',
+                'new_password.regex' => 'A senha deve conter pelo menos uma letra maiúscula, uma letra minúscula e um número',
+                
+                'new_password_confirmation.required' => 'A confirmação da senha é obrigatória',
+                'new_password_confirmation.same' => 'A confirmação da senha não é igual à senha',
+            ]
+        );
+
+
+        // dd('Senhas OK');
+
+        // Verifica se o token é válido
+        $user = User::where('token', $request->token)->first();
+
+        if(!$user){
+            return redirect()->route('login');
+        }
+
+        // Atualizando a senha na base de dados
+        $user->password = bcrypt($request->new_password);
+        $user->token = null;
+        $user->save();
+
+
+
+        // Retornando para a view login
+        return redirect('login')->with([
+            'success' => true
+        ]);
+
+    }
+
+
+
 }

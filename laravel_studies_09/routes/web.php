@@ -28,6 +28,12 @@ Route::middleware('guest')->group(function(){
     // Recuperar senha
     Route::get('/forgot_password', [AuthController::class, 'forgot_password'])->name('forgot_password');
     Route::post('/forgot_password', [AuthController::class, 'send_reset_password_link'])->name('send_reset_password_link');
+
+
+    // Resete password
+    Route::get('/reset_password/{token}', [AuthController::class, 'reset_password'])->name('reset_password');
+    Route::post('/reset_password', [AuthController::class, 'reset_password_update'])->name('reset_password_update');
+
     
 });
 

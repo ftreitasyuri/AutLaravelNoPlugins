@@ -24,6 +24,10 @@ Route::middleware('guest')->group(function(){
     Route::post('/submit_post', [AuthController::class, 'authenticate'])->name('authenticate');
 
     Route::get('/new_user_confirm/{token}', [AuthController::class, 'new_user_confirmation'])->name('new_user_confirmation');
+
+    // Recuperar senha
+    Route::get('/forgot_password', [AuthController::class, 'forgot_password'])->name('forgot_password');
+    Route::post('/forgot_password', [AuthController::class, 'send_reset_password_link'])->name('send_reset_password_link');
     
 });
 
